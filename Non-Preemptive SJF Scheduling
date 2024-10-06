@@ -1,0 +1,73 @@
+#include <stdio.h>
+
+void calculateWaitingTime(int n, int burst_time[], int waiting_time[]) {
+    waiting_time[0] = 0;  // The first process has no waiting time
+    
+    for (int i = 1; i < n; i++) {
+        waiting_time[i] = burst_time[i - 1] + waiting_time[i - 1];  
+    }
+}
+
+void calculateTurnaroundTime(int n, int burst_time[], int waiting_time[], int turnaround_time[]) {
+    for (int i = 0; i < n; i++) {
+        turnaround_time[i] = burst_time[i] + waiting_time[i];  
+    }
+}
+
+void calculateAverageTime(int n, int processes[], int burst_time[]) {
+    int waiting_time[n], turnaround_time[n], total_waiting_time = 0, total_turnaround_time = 0;
+
+    calculateWaitingTime(n, burst_time, waiting_time);
+
+    calculateTurnaroundTime(n, burst_time, waiting_time, turnaround_time);
+    
+    printf("Processes   Burst Time   Waiting Time   Turnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        total_waiting_time += waiting_time[i];
+        total_turnaround_time += turnaround_time[i];
+        printf("    %d          %d              %d              %d\n", processes[i], burst_time[i], waiting_time[i], turnaround_time[i]);
+    }
+    
+   
+    printf("\nAverage Waiting Time = %.2f", (float)total_waiting_time / n);
+    printf("\nAverage Turnaround Time = %.2f\n", (float)total_turnaround_time / n);
+}
+
+int main() {
+    int n;  // Number of processes
+
+    // Input number of processes
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int processes[n], burst_time[n];
+
+    // Input burst times
+    for (int i = 0; i < n; i++) {
+        processes[i] = i + 1;  // Process IDs (1, 2, 3, ...)
+        printf("Enter burst time for process %d: ", processes[i]);
+        scanf("%d", &burst_time[i]);
+    }
+
+    // Sorting processes by burst time (SJF)
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (burst_time[i] > burst_time[j]) {
+                // Swap burst times
+                int temp = burst_time[i];
+                burst_time[i] = burst_time[j];
+                burst_time[j] = temp;
+
+                // Swap process IDs
+                int temp_process = processes[i];
+                processes[i] = processes[j];
+                processes[j] = temp_process;
+            }
+        }
+    }
+
+    // Calculate and display average waiting and turnaround times
+    calculateAverageTime(n, processes, burst_time);
+
+    return 0;
+}
