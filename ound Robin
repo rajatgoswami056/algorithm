@@ -1,0 +1,80 @@
+#include <stdio.h>
+
+void calculateWaitingTime(int processes[], int n, int burst_time[], int waiting_time[], int quantum) {
+    int remaining_time[n];
+    for (int i = 0; i < n; i++) {
+        remaining_time[i] = burst_time[i];
+    }
+
+    int t = 0; 
+
+   
+    while (1) {
+        int done = 1; 
+        for (int i = 0; i < n; i++) {
+            if (remaining_time[i] > 0) {
+                done = 0; // There is a pending process
+
+                if (remaining_time[i] > quantum) {
+                    t += quantum; 
+                    remaining_time[i] -= quantum; 
+                    
+                    t += remaining_time[i]; 
+                    waiting_time[i] = t - burst_time[i]; 
+                    remaining_time[i] = 0; // Mark the process as completed
+                }
+            }
+        }
+
+        if (done == 1)
+            break;
+    }
+}
+
+void calculateTurnaroundTime(int processes[], int n, int burst_time[], int waiting_time[], int turnaround_time[]) {
+    for (int i = 0; i < n; i++) {
+        turnaround_time[i] = burst_time[i] + waiting_time[i];
+    }
+}
+
+void calculateAverageTime(int processes[], int n, int burst_time[], int quantum) {
+    int waiting_time[n], turnaround_time[n];
+    int total_waiting_time = 0, total_turnaround_time = 0;
+
+    calculateWaitingTime(processes, n, burst_time, waiting_time, quantum);
+
+    calculateTurnaroundTime(processes, n, burst_time, waiting_time, turnaround_time);
+
+    printf("Processes  Burst Time  Waiting Time  Turnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        total_waiting_time += waiting_time[i];
+        total_turnaround_time += turnaround_time[i];
+        printf("    %d           %d           %d              %d\n", processes[i], burst_time[i], waiting_time[i], turnaround_time[i]);
+    }
+
+    printf("\nAverage Waiting Time = %.2f", (float)total_waiting_time / n);
+    printf("\nAverage Turnaround Time = %.2f\n", (float)total_turnaround_time / n);
+}
+
+int main() {
+    int n; // Number of processes
+    int quantum; // Time quantum
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int processes[n], burst_time[n];
+
+    for (int i = 0; i < n; i++) {
+        processes[i] = i + 1; // Process IDs (1, 2, 3, ...)
+        printf("Enter burst time for process %d: ", processes[i]);
+        scanf("%d", &burst_time[i]);
+    }
+
+    printf("Enter time quantum: ");
+    scanf("%d", &quantum);
+
+    calculateAverageTime(processes, n, burst_time, quantum);
+
+    return 0;
+}
